@@ -1,12 +1,9 @@
-/* eslint no-underscore-dangle: ["error", { "allow": ["_url", "_original"] }] */
+const original = Symbol("original");
 
 function Collection(config) {
   Object.assign(this, config);
 
-  Object.defineProperty(this, '_original', {
-    value: Object.assign({}, this),
-    writable: true,
-  });
+  this[original] = Object.assign({}, this);
 }
 
 Collection.url = 'http://jsonplaceholder.typicode.com/todos';
@@ -26,7 +23,7 @@ Collection.get = function (id) {
 Collection.prototype.save = function () {
   if (this.id) {
     const diff = Object.keys(this)
-      .filter(key => this._original[key] !== this[key])
+      .filter(key => this[original][key] !== this[key])
       .reduce((acc, key) => {
         const result = acc;
         result[key] = this[key];
@@ -46,7 +43,7 @@ Collection.prototype.save = function () {
       headers: { 'Content-Type': 'application/json' },
     })
       .then(response => {
-        this._original = props;
+        this[original] = props;
         return response;
       });
   }
